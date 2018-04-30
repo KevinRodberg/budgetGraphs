@@ -26,9 +26,34 @@ ggplotColours <- function(n = 6, h = c(0, 360) + 15) {
 options(warn = -1)
 options(scipen = 100000)
 
-source ("//ad.sfwmd.gov/dfsroot/data/wsd/SUP/devel/source/R/ResuableFunctions/rasterFuncs.R")
-source ("//ad.sfwmd.gov/dfsroot/data/wsd/SUP/devel/source/R/ResuableFunctions/gisFuncs.R")
-source ("//ad.sfwmd.gov/dfsroot/data/wsd/SUP/devel/source/R/ResuableFunctions/modflowDataFuncs.R")
+source_github <- function(u) {
+  # load package
+  require(RCurl)
+  
+  # read script lines from website
+  script <- getURL(u, ssl.verifypeer = FALSE)
+  script<-strsplit(script,"\r\n")
+  # parase lines and evealuate in the global environement
+  eval(parse(text = unlist(script)))
+}
+
+source_https<-function(u, unlink.tmp.certs = FALSE) {
+  # load package
+  require(RCurl)
+  
+  # read script lines from website using a security certificate
+  if(!file.exists("cacert.pem")) download.file(url="http://curl.haxx.se/ca/cacert.pem", destfile = "cacert.pem")
+  script <- getURL(u, followlocation = TRUE, cainfo = "cacert.pem")
+  if(unlink.tmp.certs) unlink("cacert.pem")
+  
+  # parase lines and evealuate in the global environement
+  eval(parse(text = script), envir= .GlobalEnv)
+}
+
+
+source_github("https://raw.githubusercontent.com/KevinRodberg/ReusableFunctions/master/rasterFuncs.R")
+source_github("https://raw.githubusercontent.com/KevinRodberg/ReusableFunctions/master/gisFuncs.R")
+source_github("https://raw.githubusercontent.com/KevinRodberg/ReusableFunctions/master/modflowDataFuncs.R")
 
 #=================================================================
 # Beginning of Script
